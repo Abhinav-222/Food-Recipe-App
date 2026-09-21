@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Saved Recipes - Food Recipe App</title>
+
+    <link rel="stylesheet" href="CSS/style.css">
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="logo">
+
+        <span>🍳</span>
+
+        <h1>Food Recipe App</h1>
+
+    </div>
+
+
+    <nav>
+
+        <a href="index.html">
+            Home
+        </a>
+
+        <a href="index.html#recipes">
+            Recipes
+        </a>
+
+        <a href="index.html#categories">
+            Categories
+        </a>
+
+        <a
+            href="saved.html"
+            class="active"
+        >
+            Saved Recipes
+        </a>
+
+        <a href="index.html#about">
+            About
+        </a>
+
+    </nav>
+
+
+    <div
+        class="user-area"
+        id="userArea"
+    >
+
+        <a
+            href="signin.html"
+            class="signin"
+        >
+            Sign In
+        </a>
+
+    </div>
+
+</header>
+
+
+
+<main class="saved-page">
+
+
+    <section class="saved-heading">
+
+        <p class="small-title">
+            YOUR COLLECTION
+        </p>
+
+        <h2>
+            ❤️ Saved Recipes
+        </h2>
+
+        <p>
+            Your favorite recipes are saved here.
+        </p>
+
+    </section>
+
+
+
+    <section
+        id="savedRecipes"
+        class="recipe-container"
+    ></section>
+
+
+
+    <div
+        id="noSavedRecipes"
+        class="no-saved"
+    >
+
+        <div class="no-saved-icon">
+            🍽️
+        </div>
+
+        <h2>
+            No Saved Recipes
+        </h2>
+
+        <p>
+            You haven't saved any recipes yet.
+        </p>
+
+        <a
+            href="index.html#recipes"
+            class="auth-button"
+        >
+            Explore Recipes
+        </a>
+
+    </div>
+
+
+</main>
+
+
+
+<footer>
+
+    <p>
+        Food Recipe App
+    </p>
+
+</footer>
+
+
+
+<script src="JS/auth.js"></script>
+
+
+<script>
+
+
+const SAVED_API =
+    "https://dummyjson.com/recipes";
+
+
+function getSavedRecipeKey() {
+
+    let user =
+        JSON.parse(
+            localStorage.getItem(
+                "loggedInUser"
+            )
+        );
+
+
+    if (
+        !user ||
+        !user.email
+    ) {
+
+        return null;
+
+    }
+
+
+    return "savedRecipes_" +
+        user.email;
+
+}
+
+
+
+async function loadSavedRecipes() {
+
+    let key =
+        getSavedRecipeKey();
+
+
+    let container =
+        document.getElementById(
+            "savedRecipes"
+        );
+
+
+    let emptyMessage =
+        document.getElementById(
+            "noSavedRecipes"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (!key) {
+
+        emptyMessage.style.display =
+            "block";
+
+        return;
+
+    }
+
+
+    let savedRecipes =
+        JSON.parse(
+            localStorage.getItem(key)
+        ) || [];
+
+
+    if (
+        savedRecipes.length === 0
+    ) {
+
+        emptyMessage.style.display =
+            "block";
+
+        return;
+
+    }
+
+
+    emptyMessage.style.display =
+        "none";
+
+
+    for (
+        let i = 0;
+        i < savedRecipes.length;
+        i++
+    ) {
+
+        try {
+
+            let response =
+                await fetch(
+                    SAVED_API +
+                    "/" +
+                    savedRecipes[i]
+                );
+
+
+            let recipe =
+                await response.json();
+
+
+            if (
+                recipe &&
+                recipe.id
+            ) {
+
+                createSavedCard(
+                    recipe,
+                    container
+                );
+
+            }
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
+
+    }
+
+}
+
+
+
+function createSavedCard(
+    recipe,
+    container
+) {
+
+    let card =
+        document.createElement(
+            "div"
+        );
+
+
+    card.className =
+        "recipe-card";
+
+
+    card.innerHTML = `
+
+        <div class="recipe-image">
+
+            <img
+                src="${recipe.image}"
+                alt="${recipe.name}"
+            >
+
+            <span class="heart saved-heart">
+                ♥
+            </span>
+
+        </div>
+
+
+        <div class="recipe-content">
+
+            <span class="tag">
+                ${recipe.cuisine || "Recipe"}
+            </span>
+
+
+            <h3>
+                ${recipe.name}
+            </h3>
+
+
+            <p>
+                ⏱️ ${recipe.prepTimeMinutes} min
+                &nbsp; | &nbsp;
+                🍽️ ${recipe.servings}
+            </p>
+
+
+            <div class="card-buttons">
+
+                <button
+                    onclick="viewSavedRecipe('${recipe.id}')"
+                >
+                    View Recipe
+                </button>
+
+
+                <button
+                    class="remove-save"
+                    onclick="removeSavedRecipe('${recipe.id}')"
+                >
+                    Remove
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    container.appendChild(card);
+
+}
+
+
+
+function viewSavedRecipe(id) {
+
+    window.location.href =
+        "recipe-details.html?id=" +
+        id;
+
+}
+
+
+
+function removeSavedRecipe(id) {
+
+    let key =
+        getSavedRecipeKey();
+
+
+    if (!key) {
+
+        return;
+
+    }
+
+
+    let savedRecipes =
+        JSON.parse(
+            localStorage.getItem(key)
+        ) || [];
+
+
+    savedRecipes =
+        savedRecipes.filter(
+            function(recipeId) {
+
+                return String(recipeId) !==
+                    String(id);
+
+            }
+        );
+
+
+    localStorage.setItem(
+        key,
+        JSON.stringify(savedRecipes)
+    );
+
+
+    loadSavedRecipes();
+
+}
+
+
+loadSavedRecipes();
+
+
+</script>
+
+
+</body>
+
+</html>
