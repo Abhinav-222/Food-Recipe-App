@@ -1,9 +1,17 @@
-let users =
-    JSON.parse(localStorage.getItem("users")) || [];
+function getUsers() {
+
+    return JSON.parse(
+        localStorage.getItem("users")
+    ) || [];
+
+}
 
 
-const ADMIN_EMAIL = "admin@foodrecipe.com";
-const ADMIN_PASSWORD = "admin123";
+const ADMIN_EMAIL =
+    "admin@foodrecipe.com";
+
+const ADMIN_PASSWORD =
+    "admin123";
 
 
 function signup() {
@@ -30,7 +38,20 @@ function signup() {
 
     if (name.length < 3) {
 
-        alert("Name must contain at least 3 characters.");
+        alert(
+            "Name must contain at least 3 characters."
+        );
+
+        return;
+
+    }
+
+
+    if (email === "") {
+
+        alert(
+            "Please enter your email."
+        );
 
         return;
 
@@ -39,7 +60,9 @@ function signup() {
 
     if (password.length < 6) {
 
-        alert("Password must contain at least 6 characters.");
+        alert(
+            "Password must contain at least 6 characters."
+        );
 
         return;
 
@@ -48,7 +71,9 @@ function signup() {
 
     if (password !== confirmPassword) {
 
-        alert("Passwords do not match.");
+        alert(
+            "Passwords do not match."
+        );
 
         return;
 
@@ -57,24 +82,34 @@ function signup() {
 
     if (email === ADMIN_EMAIL) {
 
-        alert("This email is reserved for the administrator.");
+        alert(
+            "This email is reserved for the administrator."
+        );
 
         return;
 
     }
 
 
+    let users = getUsers();
+
+
     let existingUser =
         users.find(function(user) {
 
-            return user.email === email;
+            return (
+                user.email &&
+                user.email.toLowerCase() === email
+            );
 
         });
 
 
     if (existingUser) {
 
-        alert("An account with this email already exists.");
+        alert(
+            "An account with this email already exists."
+        );
 
         return;
 
@@ -100,11 +135,16 @@ function signup() {
     );
 
 
-    alert("Account created successfully!");
+    alert(
+        "Account created successfully!"
+    );
 
-    window.location.href = "signin.html";
+
+    window.location.href =
+        "signin.html";
 
 }
+
 
 
 function signin() {
@@ -118,6 +158,28 @@ function signin() {
     let password =
         document.getElementById("signinPassword")
         .value;
+
+
+    if (email === "") {
+
+        alert(
+            "Please enter your email."
+        );
+
+        return;
+
+    }
+
+
+    if (password === "") {
+
+        alert(
+            "Please enter your password."
+        );
+
+        return;
+
+    }
 
 
     if (
@@ -140,20 +202,29 @@ function signin() {
         );
 
 
-        alert("Admin login successful!");
+        alert(
+            "Admin login successful!"
+        );
 
-        window.location.href = "admin.html";
+
+        window.location.href =
+            "admin.html";
+
 
         return;
 
     }
 
 
+    let users = getUsers();
+
+
     let user =
         users.find(function(user) {
 
             return (
-                user.email === email &&
+                user.email &&
+                user.email.toLowerCase() === email &&
                 user.password === password
             );
 
@@ -162,7 +233,9 @@ function signin() {
 
     if (!user) {
 
-        alert("Invalid email or password.");
+        alert(
+            "Invalid email or password."
+        );
 
         return;
 
@@ -175,29 +248,44 @@ function signin() {
     );
 
 
-    alert("Login successful!");
+    alert(
+        "Login successful!"
+    );
 
-    window.location.href = "index.html";
+
+    window.location.href =
+        "index.html";
 
 }
+
 
 
 function logout() {
 
-    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem(
+        "loggedInUser"
+    );
 
-    window.location.href = "index.html";
+
+    window.location.href =
+        "index.html";
 
 }
 
 
-function togglePassword(id, button) {
+
+function togglePassword(
+    id,
+    button
+) {
 
     let password =
         document.getElementById(id);
 
 
-    if (password.type === "password") {
+    if (
+        password.type === "password"
+    ) {
 
         password.type = "text";
 
@@ -214,10 +302,13 @@ function togglePassword(id, button) {
 }
 
 
+
 function updateUserArea() {
 
     let userArea =
-        document.getElementById("userArea");
+        document.getElementById(
+            "userArea"
+        );
 
 
     if (!userArea) {
@@ -229,7 +320,9 @@ function updateUserArea() {
 
     let loggedInUser =
         JSON.parse(
-            localStorage.getItem("loggedInUser")
+            localStorage.getItem(
+                "loggedInUser"
+            )
         );
 
 
@@ -240,7 +333,9 @@ function updateUserArea() {
     }
 
 
-    if (loggedInUser.role === "admin") {
+    if (
+        loggedInUser.role === "admin"
+    ) {
 
         userArea.innerHTML = `
 
@@ -286,10 +381,13 @@ function updateUserArea() {
 }
 
 
+
 function protectAuthPages() {
 
     let loggedInUser =
-        localStorage.getItem("loggedInUser");
+        localStorage.getItem(
+            "loggedInUser"
+        );
 
 
     let currentPage =
@@ -299,28 +397,39 @@ function protectAuthPages() {
     if (
         loggedInUser &&
         (
-            currentPage.includes("signin.html") ||
-            currentPage.includes("signup.html")
+            currentPage.includes(
+                "signin.html"
+            ) ||
+            currentPage.includes(
+                "signup.html"
+            )
         )
     ) {
 
         let user =
-            JSON.parse(loggedInUser);
+            JSON.parse(
+                loggedInUser
+            );
 
 
-        if (user.role === "admin") {
+        if (
+            user.role === "admin"
+        ) {
 
-            window.location.href = "admin.html";
+            window.location.href =
+                "admin.html";
 
         } else {
 
-            window.location.href = "index.html";
+            window.location.href =
+                "index.html";
 
         }
 
     }
 
 }
+
 
 
 document.addEventListener(

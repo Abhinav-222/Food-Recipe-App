@@ -1730,3 +1730,265 @@ footer {
     object-fit: cover;
     border-radius: 50%;
 }
+.about-content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.about-card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+
+.about-card h3 {
+    margin-bottom: 15px;
+}
+
+.about-card p {
+    line-height: 1.7;
+    margin-bottom: 12px;
+}
+
+.about-card ul {
+    padding-left: 20px;
+}
+
+.about-card li {
+    margin-bottom: 8px;
+}
+
+@media (max-width: 1000px) {
+
+    .about-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .about-content {
+        grid-template-columns: 1fr;
+    }
+
+}
+.about-page {
+    background-color: #fdf1df;
+    padding-bottom: 50px;
+}
+
+.about-hero {
+    text-align: center;
+    padding: 60px 20px 40px;
+}
+
+.about-hero h2 {
+    font-size: 42px;
+    margin-bottom: 15px;
+}
+
+.about-hero p {
+    font-size: 18px;
+    color: #555;
+}
+
+.about-introduction {
+    max-width: 1000px;
+    margin: 0 auto 45px;
+    background-color: white;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+    text-align: center;
+}
+
+.about-introduction h2 {
+    margin-bottom: 18px;
+}
+
+.about-introduction p {
+    line-height: 1.7;
+    margin-bottom: 10px;
+}
+
+.about-section {
+    max-width: 1200px;
+    margin: 0 auto 50px;
+    padding: 0 20px;
+}
+
+.about-section > h2 {
+    text-align: center;
+    font-size: 30px;
+    margin-bottom: 25px;
+}
+
+.about-features {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.about-feature {
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+
+.about-feature-icon {
+    width: 65px;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8eadc;
+    border-radius: 50%;
+    font-size: 30px;
+    margin: 0 auto 15px;
+}
+
+.about-feature h3 {
+    margin-bottom: 10px;
+}
+
+.about-feature p {
+    line-height: 1.6;
+    color: #555;
+}
+
+.technology-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.technology {
+    background-color: white;
+    min-width: 170px;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+
+.technology strong {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.technology span {
+    color: #666;
+    font-size: 14px;
+}
+
+.modules-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+.module-card {
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+
+.module-icon {
+    font-size: 35px;
+    margin-bottom: 10px;
+}
+
+.module-card h3 {
+    margin-bottom: 12px;
+}
+
+.module-card p {
+    line-height: 1.7;
+    color: #555;
+}
+
+.future-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+
+.future-content p {
+    margin-bottom: 20px;
+}
+
+.future-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.future-list span {
+    background-color: #f8eadc;
+    padding: 12px 18px;
+    border-radius: 20px;
+}
+
+.about-goal {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 45px 30px;
+    text-align: center;
+    background-color: #f8e2c4;
+    border-radius: 12px;
+}
+
+.about-goal h2 {
+    font-size: 32px;
+    margin-bottom: 15px;
+}
+
+.about-goal p {
+    max-width: 750px;
+    margin: auto;
+    line-height: 1.7;
+}
+
+@media (max-width: 1000px) {
+
+    .about-features {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .about-hero h2 {
+        font-size: 32px;
+    }
+
+    .about-features {
+        grid-template-columns: 1fr;
+    }
+
+    .modules-container {
+        grid-template-columns: 1fr;
+    }
+
+    .technology-list {
+        flex-direction: column;
+    }
+
+    .technology {
+        width: auto;
+    }
+
+}

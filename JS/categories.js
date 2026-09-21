@@ -2,164 +2,173 @@ const API_URL =
     "https://www.themealdb.com/api/json/v1/1";
 
 
+const selectedCuisines = [
+    "Indian",
+    "Italian",
+    "Chinese",
+    "Japanese",
+    "Mexican",
+    "American",
+    "French",
+    "Thai"
+];
+
+
+const cuisineIcons = {
+    Indian: "🍛",
+    Italian: "🍕",
+    Chinese: "🥢",
+    Japanese: "🍣",
+    Mexican: "🌮",
+    American: "🍔",
+    French: "🥐",
+    Thai: "🍜"
+};
+
+
+
 async function loadCategories() {
+
+    const categoryContainer =
+        document.getElementById(
+            "categoryContainer"
+        );
+
+    const cuisineContainer =
+        document.getElementById(
+            "cuisineContainer"
+        );
+
 
     try {
 
-        let response =
+        const response =
             await fetch(
                 API_URL +
                 "/categories.php"
             );
 
 
-        let data =
+        const data =
             await response.json();
 
 
-        let container =
-            document.getElementById(
-                "categoryContainer"
-            );
+        categoryContainer.innerHTML = "";
 
 
-        container.innerHTML = "";
+        if (data.categories) {
 
+            data.categories.forEach(
+                function(category) {
 
-        data.categories.forEach(
-            function(category) {
-
-                let card =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                card.className =
-                    "category-card";
-
-
-                card.onclick =
-                    function() {
-
-                        openCategory(
-                            category.strCategory,
-                            "category"
+                    const card =
+                        document.createElement(
+                            "div"
                         );
 
-                    };
+
+                    card.className =
+                        "category";
 
 
-                card.innerHTML = `
-
-                    <div class="category-icon">
+                    card.innerHTML = `
 
                         <img
+                            class="category-icon"
                             src="${category.strCategoryThumb}"
                             alt="${category.strCategory}"
                         >
 
-                    </div>
+                        <h3>
+                            ${category.strCategory}
+                        </h3>
 
-                    <h3>
-                        ${category.strCategory}
-                    </h3>
-
-                    <p>
-                        Explore ${category.strCategory} recipes
-                    </p>
-
-                `;
+                    `;
 
 
-                container.appendChild(
-                    card
-                );
+                    card.onclick =
+                        function() {
 
-            }
-        );
-
-
-    } catch (error) {
-
-        console.log(error);
-
-    }
-
-}
+                            localStorage.setItem(
+                                "selectedCategory",
+                                category.strCategory
+                            );
 
 
+                            localStorage.setItem(
+                                "selectedCategoryType",
+                                "category"
+                            );
 
-async function loadCuisines() {
 
-    try {
+                            window.location.href =
+                                "category-recipes.html";
 
-        let response =
-            await fetch(
-                API_URL +
-                "/list.php?a=list"
+                        };
+
+
+                    categoryContainer.appendChild(
+                        card
+                    );
+
+                }
             );
 
-
-        let data =
-            await response.json();
+        }
 
 
-        let container =
-            document.getElementById(
-                "cuisineContainer"
-            );
+
+        cuisineContainer.innerHTML = "";
 
 
-        container.innerHTML = "";
-
-
-        data.meals.forEach(
+        selectedCuisines.forEach(
             function(cuisine) {
 
-                let card =
+                const card =
                     document.createElement(
                         "div"
                     );
 
 
                 card.className =
-                    "category-card";
-
-
-                card.onclick =
-                    function() {
-
-                        openCategory(
-                            cuisine.strArea,
-                            "cuisine"
-                        );
-
-                    };
+                    "category";
 
 
                 card.innerHTML = `
 
                     <div class="category-icon">
-
-                        <span>
-                            🌍
-                        </span>
-
+                        ${cuisineIcons[cuisine]}
                     </div>
 
                     <h3>
-                        ${cuisine.strArea}
+                        ${cuisine}
                     </h3>
-
-                    <p>
-                        Explore ${cuisine.strArea} recipes
-                    </p>
 
                 `;
 
 
-                container.appendChild(
+                card.onclick =
+                    function() {
+
+                        localStorage.setItem(
+                            "selectedCategory",
+                            cuisine
+                        );
+
+
+                        localStorage.setItem(
+                            "selectedCategoryType",
+                            "cuisine"
+                        );
+
+
+                        window.location.href =
+                            "category-recipes.html";
+
+                    };
+
+
+                cuisineContainer.appendChild(
                     card
                 );
 
@@ -176,31 +185,4 @@ async function loadCuisines() {
 }
 
 
-
-function openCategory(
-    name,
-    type
-) {
-
-    localStorage.setItem(
-        "selectedCategory",
-        name
-    );
-
-
-    localStorage.setItem(
-        "selectedCategoryType",
-        type
-    );
-
-
-    window.location.href =
-        "category-recipes.html";
-
-}
-
-
-
 loadCategories();
-
-loadCuisines();

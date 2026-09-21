@@ -1,90 +1,170 @@
 const API_URL =
     "https://www.themealdb.com/api/json/v1/1";
 
-let allRecipesPage = [];
 
-let currentPage =
-    1;
+const recipesPerPage = 30;
 
-const recipesPerPage =
-    30;
+let allCategoryRecipes = [];
+
+let currentPage = 1;
 
 
-async function loadAllRecipes() {
+
+const selectedCategory =
+    localStorage.getItem(
+        "selectedCategory"
+    );
+
+
+const selectedCategoryType =
+    localStorage.getItem(
+        "selectedCategoryType"
+    );
+
+
+
+const categoryTitle =
+    document.getElementById(
+        "categoryTitle"
+    );
+
+
+const recipeContainer =
+    document.getElementById(
+        "categoryRecipesContainer"
+    );
+
+
+const pagination =
+    document.getElementById(
+        "categoryPagination"
+    );
+
+
+
+const cuisineAreaNames = {
+
+    Indian: "India",
+
+    Italian: "Italian",
+
+    Chinese: "Chinese",
+
+    Japanese: "Japanese",
+
+    Mexican: "Mexican",
+
+    American: "American",
+
+    French: "French",
+
+    Thai: "Thai"
+
+};
+
+
+
+async function loadCategoryRecipes() {
+
+    if (!selectedCategory) {
+
+        categoryTitle.textContent =
+            "Recipes";
+
+        return;
+
+    }
+
+
+    categoryTitle.textContent =
+        selectedCategory +
+        " Recipes";
+
 
     try {
 
-        allRecipesPage = [];
-
-        let letters =
-            "abcdefghijklmnopqrstuvwxyz";
+        let url;
 
 
-        for (
-            let i = 0;
-            i < letters.length;
-            i++
+        if (
+            selectedCategoryType ===
+            "category"
         ) {
 
-            let response =
-                await fetch(
-                    API_URL +
-                    "/search.php?f=" +
-                    letters[i]
+            url =
+                API_URL +
+                "/filter.php?c=" +
+                encodeURIComponent(
+                    selectedCategory
                 );
 
+        } else {
 
-            let data =
-                await response.json();
-
-
-            if (data.meals) {
-
-                data.meals.forEach(
-                    function(recipe) {
-
-                        let exists =
-                            allRecipesPage.some(
-                                function(item) {
-
-                                    return (
-                                        item.idMeal ===
-                                        recipe.idMeal
-                                    );
-
-                                }
-                            );
+            let area =
+                cuisineAreaNames[
+                    selectedCategory
+                ] || selectedCategory;
 
 
-                        if (!exists) {
-
-                            allRecipesPage.push(
-                                recipe
-                            );
-
-                        }
-
-                    }
+            url =
+                API_URL +
+                "/filter.php?a=" +
+                encodeURIComponent(
+                    area
                 );
-
-            }
 
         }
 
 
-        displayRecipePage();
+        const response =
+            await fetch(url);
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !data.meals ||
+            data.meals.length === 0
+        ) {
+
+            recipeContainer.innerHTML = `
+
+                <p>
+                    No recipes found for
+                    ${selectedCategory}.
+                </p>
+
+            `;
+
+            pagination.innerHTML = "";
+
+            return;
+
+        }
+
+
+        allCategoryRecipes =
+            data.meals;
+
+
+        currentPage = 1;
+
+
+        displayRecipes();
 
 
     } catch (error) {
 
         console.log(error);
 
-        document.getElementById(
-            "allRecipesContainer"
-        ).innerHTML = `
+
+        recipeContainer.innerHTML = `
 
             <p>
                 Unable to load recipes.
+                Please try again.
             </p>
 
         `;
@@ -95,31 +175,23 @@ async function loadAllRecipes() {
 
 
 
-function displayRecipePage() {
+function displayRecipes() {
 
-    let container =
-        document.getElementById(
-            "allRecipesContainer"
-        );
+    recipeContainer.innerHTML = "";
 
 
-    container.innerHTML = "";
-
-
-    let start =
-        (
-            currentPage - 1
-        ) *
+    const start =
+        (currentPage - 1) *
         recipesPerPage;
 
 
-    let end =
+    const end =
         start +
         recipesPerPage;
 
 
-    let recipes =
-        allRecipesPage.slice(
+    const recipes =
+        allCategoryRecipes.slice(
             start,
             end
         );
@@ -128,7 +200,7 @@ function displayRecipePage() {
     recipes.forEach(
         function(recipe) {
 
-            let card =
+            const card =
                 document.createElement(
                     "div"
                 );
@@ -147,7 +219,10 @@ function displayRecipePage() {
                         alt="${recipe.strMeal}"
                     >
 
-                    <span class="heart">
+                    <span
+                        class="heart"
+                        onclick="saveRecipe('${recipe.idMeal}')"
+                    >
                         ♡
                     </span>
 
@@ -157,7 +232,7 @@ function displayRecipePage() {
                 <div class="recipe-content">
 
                     <span class="tag">
-                        ${recipe.strArea || "Recipe"}
+                        ${selectedCategory}
                     </span>
 
 
@@ -166,35 +241,18 @@ function displayRecipePage() {
                     </h3>
 
 
-                    <p>
-                        ${recipe.strCategory || "Delicious Recipe"}
-                    </p>
-
-
-                    <div class="card-buttons">
-
-                        <button
-                            onclick="viewRecipe('${recipe.idMeal}')"
-                        >
-                            View Recipe
-                        </button>
-
-
-                        <button
-                            class="save-button"
-                            onclick="saveRecipe('${recipe.idMeal}')"
-                        >
-                            Save
-                        </button>
-
-                    </div>
+                    <button
+                        onclick="viewRecipe('${recipe.idMeal}')"
+                    >
+                        View Recipe
+                    </button>
 
                 </div>
 
             `;
 
 
-            container.appendChild(
+            recipeContainer.appendChild(
                 card
             );
 
@@ -210,39 +268,31 @@ function displayRecipePage() {
 
 function createPagination() {
 
-    let pagination =
-        document.getElementById(
-            "recipePagination"
-        );
-
-
     pagination.innerHTML = "";
 
 
-    let totalPages =
+    const totalPages =
         Math.ceil(
-            allRecipesPage.length /
+            allCategoryRecipes.length /
             recipesPerPage
         );
 
 
-    if (
-        totalPages <= 1
-    ) {
+    if (totalPages <= 1) {
 
         return;
 
     }
 
 
-    let previousButton =
+    const previousButton =
         document.createElement(
             "button"
         );
 
 
     previousButton.textContent =
-        "← Previous";
+        "Previous";
 
 
     previousButton.disabled =
@@ -252,21 +302,11 @@ function createPagination() {
     previousButton.onclick =
         function() {
 
-            if (
-                currentPage > 1
-            ) {
+            if (currentPage > 1) {
 
                 currentPage--;
 
-                displayRecipePage();
-
-                window.scrollTo({
-
-                    top: 0,
-
-                    behavior: "smooth"
-
-                });
+                displayRecipes();
 
             }
 
@@ -278,67 +318,61 @@ function createPagination() {
     );
 
 
+
     for (
-        let i = 1;
-        i <= totalPages;
-        i++
+        let page = 1;
+        page <= totalPages;
+        page++
     ) {
 
-        let pageButton =
+        const button =
             document.createElement(
                 "button"
             );
 
 
-        pageButton.textContent =
-            i;
+        button.textContent =
+            page;
 
 
         if (
-            i === currentPage
+            page === currentPage
         ) {
 
-            pageButton.classList.add(
-                "active-page"
+            button.classList.add(
+                "active"
             );
 
         }
 
 
-        pageButton.onclick =
+        button.onclick =
             function() {
 
                 currentPage =
-                    i;
+                    page;
 
-                displayRecipePage();
-
-                window.scrollTo({
-
-                    top: 0,
-
-                    behavior: "smooth"
-
-                });
+                displayRecipes();
 
             };
 
 
         pagination.appendChild(
-            pageButton
+            button
         );
 
     }
 
 
-    let nextButton =
+
+    const nextButton =
         document.createElement(
             "button"
         );
 
 
     nextButton.textContent =
-        "Next →";
+        "Next";
 
 
     nextButton.disabled =
@@ -355,15 +389,7 @@ function createPagination() {
 
                 currentPage++;
 
-                displayRecipePage();
-
-                window.scrollTo({
-
-                    top: 0,
-
-                    behavior: "smooth"
-
-                });
+                displayRecipes();
 
             }
 
@@ -378,106 +404,4 @@ function createPagination() {
 
 
 
-function viewRecipe(id) {
-
-    window.location.href =
-        "recipe-details.html?id=" +
-        id;
-
-}
-
-
-
-function getSavedRecipeKey() {
-
-    let loggedInUser =
-        JSON.parse(
-            localStorage.getItem(
-                "loggedInUser"
-            )
-        );
-
-
-    if (
-        !loggedInUser ||
-        !loggedInUser.email
-    ) {
-
-        return null;
-
-    }
-
-
-    return (
-        "savedRecipes_" +
-        loggedInUser.email
-    );
-
-}
-
-
-
-function saveRecipe(id) {
-
-    let key =
-        getSavedRecipeKey();
-
-
-    if (!key) {
-
-        alert(
-            "Please sign in to save recipes."
-        );
-
-
-        window.location.href =
-            "signin.html";
-
-
-        return;
-
-    }
-
-
-    let savedRecipes =
-        JSON.parse(
-            localStorage.getItem(key)
-        ) || [];
-
-
-    id =
-        String(id);
-
-
-    if (
-        !savedRecipes.includes(id)
-    ) {
-
-        savedRecipes.push(id);
-
-
-        localStorage.setItem(
-            key,
-            JSON.stringify(
-                savedRecipes
-            )
-        );
-
-
-        alert(
-            "Recipe saved!"
-        );
-
-    } else {
-
-        alert(
-            "Recipe is already saved."
-        );
-
-    }
-
-}
-
-
-
-loadAllRecipes();
+loadCategoryRecipes();

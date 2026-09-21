@@ -1,82 +1,184 @@
 const API_URL =
     "https://www.themealdb.com/api/json/v1/1";
 
-let selectedCuisine =
-    localStorage.getItem("selectedCuisine");
-
-let categoryRecipes = [];
-
-let currentPage = 1;
 
 const recipesPerPage = 30;
 
+let allRecipes = [];
 
-const areaNames = {
+let currentPage = 1;
+
+
+const selectedCategory =
+    localStorage.getItem(
+        "selectedCategory"
+    );
+
+
+const selectedCategoryType =
+    localStorage.getItem(
+        "selectedCategoryType"
+    );
+
+
+const categoryTitle =
+    document.getElementById(
+        "categoryTitle"
+    );
+
+
+const recipeContainer =
+    document.getElementById(
+        "categoryRecipesContainer"
+    );
+
+
+const pagination =
+    document.getElementById(
+        "categoryPagination"
+    );
+
+
+const cuisineAreas = {
 
     Indian: "India",
+
     Italian: "Italian",
+
     Chinese: "Chinese",
+
     Japanese: "Japanese",
+
     Mexican: "Mexican",
+
     American: "American",
+
     French: "French",
+
     Thai: "Thai"
 
 };
 
 
+
 async function loadCategoryRecipes() {
 
-    if (!selectedCuisine) {
+    if (!selectedCategory) {
 
-        window.location.href =
-            "categories.html";
+        categoryTitle.textContent =
+            "Recipes";
 
         return;
 
     }
 
 
-    document.getElementById(
-        "categoryTitle"
-    ).textContent =
-        selectedCuisine + " Recipes";
+    categoryTitle.textContent =
+        selectedCategory +
+        " Recipes";
+
+
+    let url;
+
+
+    if (
+        selectedCategoryType ===
+        "category"
+    ) {
+
+        url =
+            API_URL +
+            "/filter.php?c=" +
+            encodeURIComponent(
+                selectedCategory
+            );
+
+    } else {
+
+        let area =
+            cuisineAreas[
+                selectedCategory
+            ] || selectedCategory;
+
+
+        url =
+            API_URL +
+            "/filter.php?a=" +
+            encodeURIComponent(
+                area
+            );
+
+    }
 
 
     try {
 
-        let area =
-            areaNames[selectedCuisine];
+        const response =
+            await fetch(url);
 
 
-        let response =
-            await fetch(
-                API_URL +
-                "/filter.php?a=" +
-                area
-            );
-
-
-        let data =
+        const data =
             await response.json();
 
 
-        categoryRecipes =
-            data.meals || [];
+        if (
+            !data.meals ||
+            data.meals.length === 0
+        ) {
+
+            recipeContainer.innerHTML = `
+
+                <div class="no-saved">
+
+                    <h2>
+                        No Recipes Found
+                    </h2>
+
+                    <p>
+                        No recipes are available for
+                        ${selectedCategory}.
+                    </p>
+
+                </div>
+
+            `;
+
+            pagination.innerHTML = "";
+
+            return;
+
+        }
 
 
-        displayCategoryRecipes();
+        allRecipes =
+            data.meals;
+
+
+        currentPage = 1;
+
+
+        displayRecipes();
+
 
     } catch (error) {
 
         console.log(error);
 
-        document.getElementById(
-            "categoryRecipesContainer"
-        ).innerHTML = `
-            <p>
-                Unable to load recipes.
-            </p>
+
+        recipeContainer.innerHTML = `
+
+            <div class="no-saved">
+
+                <h2>
+                    Unable to Load Recipes
+                </h2>
+
+                <p>
+                    Please try again.
+                </p>
+
+            </div>
+
         `;
 
     }
@@ -84,29 +186,24 @@ async function loadCategoryRecipes() {
 }
 
 
-function displayCategoryRecipes() {
 
-    let container =
-        document.getElementById(
-            "categoryRecipesContainer"
-        );
+function displayRecipes() {
+
+    recipeContainer.innerHTML = "";
 
 
-    container.innerHTML = "";
-
-
-    let start =
+    const start =
         (currentPage - 1) *
         recipesPerPage;
 
 
-    let end =
+    const end =
         start +
         recipesPerPage;
 
 
-    let recipes =
-        categoryRecipes.slice(
+    const recipes =
+        allRecipes.slice(
             start,
             end
         );
@@ -115,7 +212,7 @@ function displayCategoryRecipes() {
     recipes.forEach(
         function(recipe) {
 
-            let card =
+            const card =
                 document.createElement(
                     "div"
                 );
@@ -134,32 +231,40 @@ function displayCategoryRecipes() {
                         alt="${recipe.strMeal}"
                     >
 
+                    <button
+                        class="heart"
+                        onclick="saveRecipe('${recipe.idMeal}')"
+                    >
+                        ♡
+                    </button>
+
                 </div>
 
 
                 <div class="recipe-content">
+
+                    <span class="tag">
+                        ${selectedCategory}
+                    </span>
+
 
                     <h3>
                         ${recipe.strMeal}
                     </h3>
 
 
-                    <div class="card-buttons">
-
-                        <button
-                            onclick="viewRecipe('${recipe.idMeal}')"
-                        >
-                            View Recipe
-                        </button>
-
-                    </div>
+                    <button
+                        onclick="viewRecipe('${recipe.idMeal}')"
+                    >
+                        View Recipe
+                    </button>
 
                 </div>
 
             `;
 
 
-            container.appendChild(
+            recipeContainer.appendChild(
                 card
             );
 
@@ -172,20 +277,15 @@ function displayCategoryRecipes() {
 }
 
 
+
 function createPagination() {
-
-    let pagination =
-        document.getElementById(
-            "categoryPagination"
-        );
-
 
     pagination.innerHTML = "";
 
 
-    let totalPages =
+    const totalPages =
         Math.ceil(
-            categoryRecipes.length /
+            allRecipes.length /
             recipesPerPage
         );
 
@@ -197,69 +297,57 @@ function createPagination() {
     }
 
 
-    let previousButton =
+    const previous =
         document.createElement(
             "button"
         );
 
 
-    previousButton.textContent =
-        "← Previous";
+    previous.textContent =
+        "Previous";
 
 
-    previousButton.disabled =
+    previous.disabled =
         currentPage === 1;
 
 
-    previousButton.onclick =
+    previous.onclick =
         function() {
 
-            if (currentPage > 1) {
+            currentPage--;
 
-                currentPage--;
-
-                displayCategoryRecipes();
-
-                window.scrollTo({
-
-                    top: 0,
-
-                    behavior: "smooth"
-
-                });
-
-            }
+            displayRecipes();
 
         };
 
 
     pagination.appendChild(
-        previousButton
+        previous
     );
 
 
     for (
-        let i = 1;
-        i <= totalPages;
-        i++
+        let page = 1;
+        page <= totalPages;
+        page++
     ) {
 
-        let button =
+        const button =
             document.createElement(
                 "button"
             );
 
 
         button.textContent =
-            i;
+            page;
 
 
         if (
-            i === currentPage
+            page === currentPage
         ) {
 
             button.classList.add(
-                "active-page"
+                "active"
             );
 
         }
@@ -269,17 +357,9 @@ function createPagination() {
             function() {
 
                 currentPage =
-                    i;
+                    page;
 
-                displayCategoryRecipes();
-
-                window.scrollTo({
-
-                    top: 0,
-
-                    behavior: "smooth"
-
-                });
+                displayRecipes();
 
             };
 
@@ -291,50 +371,125 @@ function createPagination() {
     }
 
 
-    let nextButton =
+    const next =
         document.createElement(
             "button"
         );
 
 
-    nextButton.textContent =
-        "Next →";
+    next.textContent =
+        "Next";
 
 
-    nextButton.disabled =
+    next.disabled =
         currentPage === totalPages;
 
 
-    nextButton.onclick =
+    next.onclick =
         function() {
 
-            if (
-                currentPage <
-                totalPages
-            ) {
+            currentPage++;
 
-                currentPage++;
-
-                displayCategoryRecipes();
-
-                window.scrollTo({
-
-                    top: 0,
-
-                    behavior: "smooth"
-
-                });
-
-            }
+            displayRecipes();
 
         };
 
 
     pagination.appendChild(
-        nextButton
+        next
     );
 
 }
+
+
+
+function getSavedRecipeKey() {
+
+    const user =
+        JSON.parse(
+            localStorage.getItem(
+                "loggedInUser"
+            )
+        );
+
+
+    if (
+        !user ||
+        !user.email
+    ) {
+
+        return null;
+
+    }
+
+
+    return "savedRecipes_" +
+        user.email;
+
+}
+
+
+
+function saveRecipe(id) {
+
+    const key =
+        getSavedRecipeKey();
+
+
+    if (!key) {
+
+        alert(
+            "Please sign in to save recipes."
+        );
+
+        window.location.href =
+            "signin.html";
+
+        return;
+
+    }
+
+
+    let savedRecipes =
+        JSON.parse(
+            localStorage.getItem(key)
+        ) || [];
+
+
+    if (
+        savedRecipes.includes(
+            String(id)
+        )
+    ) {
+
+        alert(
+            "Recipe is already saved."
+        );
+
+        return;
+
+    }
+
+
+    savedRecipes.push(
+        String(id)
+    );
+
+
+    localStorage.setItem(
+        key,
+        JSON.stringify(
+            savedRecipes
+        )
+    );
+
+
+    alert(
+        "Recipe saved!"
+    );
+
+}
+
 
 
 function viewRecipe(id) {
@@ -344,6 +499,7 @@ function viewRecipe(id) {
         id;
 
 }
+
 
 
 loadCategoryRecipes();
